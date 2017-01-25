@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="lets_chat.ChatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:lets_chat"
+             xmlns:v="clr-namespace:lets_chat.Views"
+             xmlns:vm="clr-namespace:lets_chat.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:ChatViewModel, IsDesignTimeCreatable=False}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>       
+
+        <v:RegisterView Grid.Column="0" 
+                        Grid.Row="0"
+                        DataContext="{Binding RegisterViewModel}"/>
+        
+        <v:ReceiveMessageView Grid.Column="0"
+                              Grid.Row="1"
+                              DataContext="{Binding ReceiveMessageViewModel}"/>
+        
+        <v:SendMessageView Grid.Column="0"
+                           Grid.Row="2"
+                           DataContext="{Binding SendMessageViewModel}"/>
+
+    </Grid>
+</UserControl>

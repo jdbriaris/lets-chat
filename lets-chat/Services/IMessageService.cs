@@ -7,6 +7,7 @@ namespace lets_chat
         void Start();
         void Stop();
         void SendMessage(string msg);
+        void RegisterUser(string user);
         event EventHandler<string> MessageReceived;
     }
 }

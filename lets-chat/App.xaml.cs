@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using lets_chat.ViewModels;
+using System.Windows;
 
 namespace lets_chat
 {
@@ -14,7 +15,11 @@ namespace lets_chat
             _messageService = new MessageService();
             _messageService.Start();
 
-            var chatViewModel = new ChatViewModel(_messageService);
+            var registerViewModel = new RegisterViewModel(_messageService);
+            var sendMessageViewModel = new SendMessageViewModel(_messageService);
+            var receiveMessageViewModel = new ReceiveMessageViewModel(_messageService);
+            
+            var chatViewModel = new ChatViewModel(registerViewModel, sendMessageViewModel, receiveMessageViewModel);
 
             var appViewModel = new AppViewModel();
             appViewModel.ViewModel = chatViewModel;
