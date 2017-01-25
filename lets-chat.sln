@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lets-chat", "lets-chat\lets
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lets-chat-tests", "lets-chat-tests\lets-chat-tests.csproj", "{EF416BE1-D010-4BEF-894D-C7E31A4ED7C1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{B6A853B4-6DF8-4025-A450-5E102485F774}"
+	ProjectSection(SolutionItems) = preProject
+		\\iplbath.com\FILES\USERS\James.Briaris\Desktop\azure_service_bus.PNG = \\iplbath.com\FILES\USERS\James.Briaris\Desktop\azure_service_bus.PNG
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
