@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lets-chat", "lets-chat\lets-chat.csproj", "{92E419FE-5A3F-45B6-8771-589062AF283C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lets-chat-tests", "lets-chat-tests\lets-chat-tests.csproj", "{EF416BE1-D010-4BEF-894D-C7E31A4ED7C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{92E419FE-5A3F-45B6-8771-589062AF283C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92E419FE-5A3F-45B6-8771-589062AF283C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92E419FE-5A3F-45B6-8771-589062AF283C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF416BE1-D010-4BEF-894D-C7E31A4ED7C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF416BE1-D010-4BEF-894D-C7E31A4ED7C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF416BE1-D010-4BEF-894D-C7E31A4ED7C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF416BE1-D010-4BEF-894D-C7E31A4ED7C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
