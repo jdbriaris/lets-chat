@@ -6,10 +6,10 @@ To run the application you must first create a SeviceBus namespace on Azure. Onc
 
 ```xml
 <appSettings>
-        <!-- Service Bus specific app setings for messaging connections -->
-        <add key="Microsoft.ServiceBus.ConnectionString"
+  <!-- Service Bus specific app setings for messaging connections -->
+  <add key="Microsoft.ServiceBus.ConnectionString"
             value="[YourConnectionString]"/>
-    </appSettings>
+</appSettings>
 ```
 where `[YourConnectionString]` is the primary key connection string for the service bus namespace that you just created.
 
