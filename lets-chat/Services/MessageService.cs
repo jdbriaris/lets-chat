@@ -1,15 +1,14 @@
 ﻿using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using System;
+using System.Configuration;
 
 namespace lets_chat
 {
     public class MessageService : IMessageService
     {
         //TODO: Make async
-
-        //TODO: Connection string ought to go in some kind of configuration (use CloudConfigurationManager)
-        private const string ServiceBusConnectionString = "Endpoint=sb://letschat.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ZGT7w8X//XDEvww/R/XWt7RBLWnmBsxG+KpXdh2UyhU=";
+        private string _connectionString;
         private const string Topic = "ChatRoom";
         private static NamespaceManager _manager;
         private static SubscriptionClient _subscriptionClient;
@@ -18,7 +17,8 @@ namespace lets_chat
 
         public void Start()
         {
-            _manager = NamespaceManager.CreateFromConnectionString(ServiceBusConnectionString);
+            _connectionString = ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
+            _manager = NamespaceManager.CreateFromConnectionString(_connectionString);
             CreateTopic();
             CreateTopicClient();
         }
@@ -34,7 +34,11 @@ namespace lets_chat
         public void Stop()
         {
             _topicClient.Close();
-            _subscriptionClient.Close();
+
+            if (_subscriptionClient != null)
+            {
+                _subscriptionClient.Close();
+            }            
         }
 
         private void ReceiveMessage(BrokeredMessage msg)
@@ -67,13 +71,13 @@ namespace lets_chat
         private void CreateSubscriptionClient(string subscription)
         {
             _subscriptionClient = SubscriptionClient
-                .CreateFromConnectionString(ServiceBusConnectionString, Topic, subscription);
+                .CreateFromConnectionString(_connectionString, Topic, subscription);
             _subscriptionClient.OnMessage(msg => ReceiveMessage(msg));
         }
 
         private void CreateTopicClient()
         {
-            _topicClient = TopicClient.CreateFromConnectionString(ServiceBusConnectionString, Topic);
+            _topicClient = TopicClient.CreateFromConnectionString(_connectionString, Topic);
         }
     }
 }
