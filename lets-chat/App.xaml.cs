@@ -1,4 +1,4 @@
-﻿using lets_chat.ViewModels;
+﻿using Microsoft.Practices.Unity;
 using System.Windows;
 
 namespace lets_chat
@@ -8,30 +8,24 @@ namespace lets_chat
     /// </summary>
     public partial class App : Application
     {
-        private IMessageService _messageService;
+        private IUnityContainer _container;
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            _messageService = new MessageService();
-            _messageService.Start();
+            _container = new UnityContainer();
 
-            var registerViewModel = new RegisterViewModel(_messageService);
-            var sendMessageViewModel = new SendMessageViewModel(_messageService);
-            var receiveMessageViewModel = new ReceiveMessageViewModel(_messageService);
-            
-            var chatViewModel = new ChatViewModel(registerViewModel, sendMessageViewModel, receiveMessageViewModel);
+            Bootstrapper.RegisterTypes(_container);
 
-            var appViewModel = new AppViewModel();
-            appViewModel.ViewModel = chatViewModel;
-
-            var appView = new AppView(appViewModel);
+            var appView = _container.Resolve<AppView>();
             appView.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-            _messageService.Stop();
+
+            var messageService = _container.Resolve<IMessageService>();
+            messageService.Stop();
         }
     }
 }
