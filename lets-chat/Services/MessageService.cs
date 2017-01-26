@@ -2,6 +2,7 @@
 using Microsoft.ServiceBus.Messaging;
 using System;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace lets_chat
 {
@@ -38,7 +39,7 @@ namespace lets_chat
                 await _manager.CreateSubscriptionAsync(_topic, user);
             }
             _subscriptionClient = _factory.CreateSubscriptionClient(_topic, user);
-            _subscriptionClient.OnMessage((msg) => ReceiveMessage(msg));
+            _subscriptionClient.OnMessageAsync((msg) => ReceiveMessage(msg));
         }
 
         public async void Stop()
@@ -65,12 +66,18 @@ namespace lets_chat
             }
         }
 
-        private void ReceiveMessage(BrokeredMessage msg)
+        private async Task ReceiveMessage(BrokeredMessage msg)
         {
-            var body = msg.GetBody<string>();
-            MessageReceived?.Invoke(this, body);
-            msg.Complete();
-        }        
+            await Task.Run(() =>
+            {
+                var body = msg.GetBody<string>();
+                Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+                {
+                    MessageReceived?.Invoke(this, body);
+                }));
+                msg.Complete();
+            });            
+        }     
 
     }
 }

@@ -8,7 +8,17 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:ReceiveMessageViewModel, IsDesignTimeCreatable=False}">
 
-        <TextBlock Background="Azure"
-                   Text="{Binding Message}"/>
+        <!--<TextBlock Background="Azure"
+                   Text="{Binding Message}"/>-->
+
+
+    <ItemsControl Name="MessageView"
+                  ItemsSource="{Binding Messages}">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <TextBlock Text="{Binding}"/>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>       
+    </ItemsControl>
 
 </UserControl>
