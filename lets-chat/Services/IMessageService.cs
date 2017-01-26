@@ -4,7 +4,8 @@ namespace lets_chat
 {
     public interface IMessageService
     {
-        void Start();
+        //void Start();
+        void Initialize();
         void Stop();
         void SendMessage(string msg);
         void RegisterUser(string user);

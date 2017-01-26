@@ -80,6 +80,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ViewModelTests\ReceiveMessageViewModel_Tests.cs" />
+    <Compile Include="ViewModelTests\RegisterViewModel_Tests.cs" />
     <Compile Include="ViewModelTests\SendMessageViewModel_Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

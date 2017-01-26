@@ -1,5 +1,6 @@
 ﻿using lets_chat.ViewModels;
 using Microsoft.Practices.Unity;
+using System.Configuration;
 
 namespace lets_chat
 {
@@ -7,10 +8,9 @@ namespace lets_chat
     {
         public static void RegisterTypes(IUnityContainer container)
         {
-            var messageService = new MessageService();
-            messageService.Start();
-
-            container.RegisterInstance(typeof(IMessageService), messageService);
+            var connString = ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
+            var topic = "ChatRoom";
+            container.RegisterInstance(typeof(IMessageService), new MessageService(connString, topic));
 
             container.RegisterType<ISendMessageViewModel, SendMessageViewModel>();
             container.RegisterType<IReceiveMessageViewModel, ReceiveMessageViewModel>();

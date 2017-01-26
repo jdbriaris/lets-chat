@@ -1,44 +1,68 @@
 ﻿using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using System;
-using System.Configuration;
+using System.Threading.Tasks;
 
 namespace lets_chat
 {
     public class MessageService : IMessageService
     {
-        //TODO: Make async
-        private string _connectionString;
-        private const string Topic = "ChatRoom";
+        private readonly string _connectionString;
+        private readonly string _topic;
         private static NamespaceManager _manager;
+        private static MessagingFactory _factory;
         private static SubscriptionClient _subscriptionClient;
         private TopicClient _topicClient;
         public event EventHandler<string> MessageReceived;
 
-        public void Start()
+        public MessageService(string serviceBusConnectionString, string topicPath)
         {
-            _connectionString = ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
-            _manager = NamespaceManager.CreateFromConnectionString(_connectionString);
-            CreateTopic();
-            CreateTopicClient();
+            _connectionString = serviceBusConnectionString;
+            _topic = topicPath;
         }
 
-        private static void CreateTopic()
+        public async void Initialize()
         {
-            if (!_manager.TopicExists(Topic))
+            _manager = NamespaceManager.CreateFromConnectionString(_connectionString);
+            _factory = MessagingFactory.CreateFromConnectionString(_connectionString);
+
+            await CreateTopic(_topic);
+            _topicClient = _factory.CreateTopicClient(_topic);
+        }
+
+        public async void RegisterUser(string user)
+        {
+            var subscriptionExists = await _manager.SubscriptionExistsAsync(_topic, user);
+            if (!subscriptionExists)
             {
-                _manager.CreateTopic(Topic);
+                await _manager.CreateSubscriptionAsync(_topic, user);
             }
-        }             
+            _subscriptionClient = _factory.CreateSubscriptionClient(_topic, user);
+            _subscriptionClient.OnMessage((msg) => ReceiveMessage(msg));
+        }
 
-        public void Stop()
+        public async void Stop()
         {
-            _topicClient.Close();
-
+            await _topicClient.CloseAsync();
             if (_subscriptionClient != null)
             {
-                _subscriptionClient.Close();
-            }            
+                await _subscriptionClient.CloseAsync();
+            }
+        }
+
+        public async void SendMessage(string msg)
+        {
+            var brokeredMsg = new BrokeredMessage(msg);
+            await _topicClient.SendAsync(brokeredMsg);
+        }
+
+        private async Task CreateTopic(string topicPath)
+        {
+            var topicExists = await _manager.TopicExistsAsync(topicPath);
+            if (!topicExists)
+            {
+                await _manager.CreateTopicAsync(topicPath);
+            }
         }
 
         private void ReceiveMessage(BrokeredMessage msg)
@@ -46,38 +70,7 @@ namespace lets_chat
             var body = msg.GetBody<string>();
             MessageReceived?.Invoke(this, body);
             msg.Complete();
-        }
+        }        
 
-        public void SendMessage(string msg)
-        {
-            var brokeredMsg = new BrokeredMessage(msg);
-            _topicClient.Send(brokeredMsg);
-        }
-
-        public void RegisterUser(string user)
-        {
-            CreateUserSubscription(user);
-            CreateSubscriptionClient(user);
-        }
-
-        private static void CreateUserSubscription(string subscription)
-        {
-            if (!_manager.SubscriptionExists(Topic, subscription))
-            {
-                _manager.CreateSubscription(Topic, subscription);
-            }
-        }
-
-        private void CreateSubscriptionClient(string subscription)
-        {
-            _subscriptionClient = SubscriptionClient
-                .CreateFromConnectionString(_connectionString, Topic, subscription);
-            _subscriptionClient.OnMessage(msg => ReceiveMessage(msg));
-        }
-
-        private void CreateTopicClient()
-        {
-            _topicClient = TopicClient.CreateFromConnectionString(_connectionString, Topic);
-        }
     }
 }
