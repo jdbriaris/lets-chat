@@ -1,6 +1,8 @@
 # lets-chat
 A simple chat application that demonstrates the Azure Service Bus
 
+![Azure Service Bus Architecture](https://docs.microsoft.com/en-us/azure/includes/media/howto-service-bus-topics/sb-topics-01.png)
+
 ## Setup
 To run the application you must first create a SeviceBus namespace on Azure. Once created, add the following configuration setting to `App.config`
 
