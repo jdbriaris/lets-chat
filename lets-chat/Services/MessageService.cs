@@ -1,4 +1,4 @@
-﻿using Microsoft.ServiceBus;
+﻿using lets_chat.Services;
 using Microsoft.ServiceBus.Messaging;
 using System;
 using System.Threading.Tasks;
@@ -8,62 +8,101 @@ namespace lets_chat
 {
     public class MessageService : IMessageService
     {
-        private readonly string _connectionString;
         private readonly string _topic;
-        private static NamespaceManager _manager;
-        private static MessagingFactory _factory;
+        private string _uniqueUserId;
+        private string _user;
         private static SubscriptionClient _subscriptionClient;
         private TopicClient _topicClient;
         public event EventHandler<string> MessageReceived;
+        public event EventHandler UserRegistered;
+        public event EventHandler UserUnregistered;
 
-        public MessageService(string serviceBusConnectionString, string topicPath)
+        private readonly IServiceBusShim _serviceBusShim;
+
+
+        public MessageService(IServiceBusShim serviceBusShim, string topic)
         {
-            _connectionString = serviceBusConnectionString;
-            _topic = topicPath;
+            _topic = topic;
+            _serviceBusShim = serviceBusShim;                
         }
 
-        public async void Initialize()
+        public void Initialize()
         {
-            _manager = NamespaceManager.CreateFromConnectionString(_connectionString);
-            _factory = MessagingFactory.CreateFromConnectionString(_connectionString);
-
-            await CreateTopic(_topic);
-            _topicClient = _factory.CreateTopicClient(_topic);
-        }
+            CreateTopic();
+            CreateTopicClient();
+        }        
 
         public async void RegisterUser(string user)
         {
-            var subscriptionExists = await _manager.SubscriptionExistsAsync(_topic, user);
+            _user = user;
+            _uniqueUserId = Guid.NewGuid().ToString();
+
+            var subscriptionExists = await _serviceBusShim.SubscriptionExistsAsync(_topic, _uniqueUserId);
             if (!subscriptionExists)
             {
-                await _manager.CreateSubscriptionAsync(_topic, user);
+                var description = new SubscriptionDescription(_topic, _uniqueUserId);
+                await _serviceBusShim.CreateSubscriptionAsync(description);
             }
-            _subscriptionClient = _factory.CreateSubscriptionClient(_topic, user);
+
+            _subscriptionClient = _serviceBusShim.CreateSubscriptionClient(_topic, _uniqueUserId);
             _subscriptionClient.OnMessageAsync((msg) => ReceiveMessage(msg));
+
+            var introMessage = ">>** " + user + " has entered the room **";
+            await SendTopicClientMessage(introMessage);
+
+            UserRegistered?.Invoke(this, EventArgs.Empty);
+        }
+        
+        public async void UnregisterUser()
+        {           
+            var exitMessage = ">>** " + _user + " has left the room **";
+            await SendTopicClientMessage(exitMessage);
+
+            if (_subscriptionClient != null)
+            {
+                await _subscriptionClient.CloseAsync();
+                await _serviceBusShim.DeleteSubscriptionAsync(_topic, _uniqueUserId);
+            }      
+
+            UserUnregistered?.Invoke(this, EventArgs.Empty);
         }
 
         public async void Stop()
         {
             await _topicClient.CloseAsync();
-            if (_subscriptionClient != null)
+            var topicDescription = _serviceBusShim.GetTopic(_topic);
+            var numberOfSubscriptions = topicDescription.SubscriptionCount;
+            if (numberOfSubscriptions == 0)
             {
-                await _subscriptionClient.CloseAsync();
-            }
+                await _serviceBusShim.DeleteTopicAsync(_topic);
+            }           
         }
 
-        public async void SendMessage(string msg)
+        private async Task SendTopicClientMessage(string msg)
         {
             var brokeredMsg = new BrokeredMessage(msg);
             await _topicClient.SendAsync(brokeredMsg);
         }
 
-        private async Task CreateTopic(string topicPath)
+        public async void SendMessage(string msg)
         {
-            var topicExists = await _manager.TopicExistsAsync(topicPath);
+            var namedMessage = _user + ">> " + msg;
+            await SendTopicClientMessage(namedMessage);            
+        }
+
+        private async void CreateTopic()
+        {
+            var topicExists = await _serviceBusShim.TopicExistsAsync(_topic);
             if (!topicExists)
             {
-                await _manager.CreateTopicAsync(topicPath);
+                var description = new TopicDescription(_topic);
+                await _serviceBusShim.CreateTopicAsync(description);
             }
+        }
+
+        private void CreateTopicClient()
+        {
+            _topicClient = _serviceBusShim.CreateTopicClient(_topic);
         }
 
         private async Task ReceiveMessage(BrokeredMessage msg)
@@ -77,7 +116,7 @@ namespace lets_chat
                 }));
                 msg.Complete();
             });            
-        }     
-
+        }
+               
     }
 }

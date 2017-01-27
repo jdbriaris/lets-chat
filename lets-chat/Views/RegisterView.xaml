@@ -9,6 +9,30 @@
              d:DataContext="{d:DesignInstance vm:RegisterViewModel, IsDesignTimeCreatable=False}">
     <Grid>
 
+        <Grid.Resources>
+            <Style x:Key="UserNamesTextBoxStyle" TargetType="TextBox">
+                <Style.Resources>
+                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                        <VisualBrush.Visual>
+                            <Label Content="Enter your name" Foreground="LightGray" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Style.Resources>
+                <Style.Triggers>
+                    <Trigger Property="Text" Value="">
+                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                    </Trigger>
+                    <Trigger Property="Text" Value="{x:Null}">
+                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                    </Trigger>
+                    <Trigger Property="IsKeyboardFocused" Value="True">
+                        <Setter Property="Background" Value="White" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>           
+        </Grid.Resources>
+        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
@@ -26,13 +50,15 @@
 
         <TextBox Grid.Column="0" 
                  Grid.Row="1"
-                 Name="UserName"/>
+                 Name="UserName"
+                 IsEnabled="{Binding IsEnterNameTextBoxEnabled}"
+                 Style="{StaticResource UserNamesTextBoxStyle}"
+                 Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}"/>
 
         <Button Grid.Column="1" 
                 Grid.Row="1"
-                Content="Enter"
-                Command="{Binding RegisterUserCommand}"
-                CommandParameter="{Binding ElementName=UserName, Path=Text}"/>
-
+                Content="{Binding ButtonText}"
+                Command="{Binding EnterLeaveChatRoomCommand}"
+                IsEnabled="{Binding IsEnterButtonEnabled}"/>
     </Grid>
 </UserControl>

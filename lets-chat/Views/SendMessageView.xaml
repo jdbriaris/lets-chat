@@ -9,6 +9,39 @@
              d:DataContext="{d:DesignInstance vm:SendMessageViewModel, IsDesignTimeCreatable=False}">
     <Grid>
 
+        <Grid.Resources>
+            <Style x:Key="SendMessageTextBoxStyle" TargetType="TextBox">
+                <Style.Resources>
+                    <VisualBrush x:Key="CueBannerBrush1" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                        <VisualBrush.Visual>
+                            <Label Content="You must enter the chat room before sending messages" Foreground="LightGray" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                    <VisualBrush x:Key="CueBannerBrush2" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                        <VisualBrush.Visual>
+                            <Label Content="Enter and send your message" Foreground="LightGray" />
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Style.Resources>
+                <!--The following triggers are brittle as they rely on the trigger order to achieve the correct
+                behaviour. Ideally this logic should be owned by the view model-->
+                <Style.Triggers>
+                    <Trigger Property="Text" Value="{x:Null}">
+                        <Setter Property="Background" Value="{StaticResource CueBannerBrush2}" />
+                    </Trigger>
+                    <Trigger Property="Text" Value="">
+                        <Setter Property="Background" Value="{StaticResource CueBannerBrush2}" />
+                    </Trigger>
+                    <DataTrigger Binding="{Binding IsSendMessageEnabled}" Value="False">
+                        <Setter Property="Background" Value="{StaticResource CueBannerBrush1}" />
+                    </DataTrigger>                    
+                    <Trigger Property="IsKeyboardFocused" Value="True">
+                        <Setter Property="Background" Value="White" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -20,14 +53,17 @@
 
         <TextBox Grid.Column="0" 
                  Grid.Row="0"
-                 Name="Message"/>
+                 Name="Message"
+                 Style="{StaticResource SendMessageTextBoxStyle}"
+                 IsEnabled="{Binding IsSendMessageEnabled}"/>
 
         <Button Grid.Column="0" 
                 Grid.Row="1"
                 HorizontalAlignment="Right"
                 Content="Send"
                 Command="{Binding SendMessageCommand}"
-                CommandParameter="{Binding ElementName=Message, Path=Text}"/>
+                CommandParameter="{Binding ElementName=Message, Path=Text}"
+                IsEnabled="{Binding IsSendMessageEnabled}"/>
 
     </Grid>
 </UserControl>

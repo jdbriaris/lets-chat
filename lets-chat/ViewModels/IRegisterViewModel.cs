@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace lets_chat.ViewModels
 {
     public interface IRegisterViewModel
     {
-        ICommand RegisterUserCommand { get; }
+        string ButtonText { get; }
+        string UserName { get; set; }
+        bool IsEnterButtonEnabled { get; }
+        bool IsEnterNameTextBoxEnabled { get; }
+        ICommand EnterLeaveChatRoomCommand { get; }
     }
 }

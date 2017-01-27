@@ -99,6 +99,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Services\IServiceBusShim.cs" />
+    <Compile Include="Services\ServiceBusShim.cs" />
     <Compile Include="ViewModels\IReceiveMessageViewModel.cs" />
     <Compile Include="ViewModels\IRegisterViewModel.cs" />
     <Compile Include="ViewModels\ISendMessageViewModel.cs" />

@@ -16,26 +16,11 @@ namespace lets_chat.ViewModels
             messageService.MessageReceived += OnMessageReceived;
         }
 
-        public ObservableCollection<string> Messages { get; set; }
-
-        public string Message
-        {
-            get
-            {
-                return _message;
-            }
-            set
-            {
-                _message = value;
-                RaisePropertyChanged();
-            }
-        }
+        public ObservableCollection<string> Messages { get; set; }        
 
         private void OnMessageReceived(object sender, string e)
         {
             Messages.Add(e);
         }
-
-
     }
 }

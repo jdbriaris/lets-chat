@@ -1,7 +1,9 @@
-﻿namespace lets_chat.ViewModels
+﻿using System.Collections.ObjectModel;
+
+namespace lets_chat.ViewModels
 {
     public interface IReceiveMessageViewModel
     {
-        string Message { get; }
+        ObservableCollection<string> Messages { get; set; }
     }
 }

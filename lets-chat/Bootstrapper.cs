@@ -1,5 +1,8 @@
-﻿using lets_chat.ViewModels;
+﻿using lets_chat.Services;
+using lets_chat.ViewModels;
 using Microsoft.Practices.Unity;
+using Microsoft.ServiceBus;
+using Microsoft.ServiceBus.Messaging;
 using System.Configuration;
 
 namespace lets_chat
@@ -10,7 +13,13 @@ namespace lets_chat
         {
             var connString = ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
             var topic = "ChatRoom";
-            container.RegisterInstance(typeof(IMessageService), new MessageService(connString, topic));
+
+            var manager = NamespaceManager.CreateFromConnectionString(connString);
+            var factory = MessagingFactory.CreateFromConnectionString(connString);
+
+            container.RegisterInstance(typeof(IServiceBusShim), new ServiceBusShim(manager, factory));
+            container.RegisterType<IMessageService, MessageService>(new ContainerControlledLifetimeManager(), 
+                new InjectionConstructor(typeof(IServiceBusShim), topic));
 
             container.RegisterType<ISendMessageViewModel, SendMessageViewModel>();
             container.RegisterType<IReceiveMessageViewModel, ReceiveMessageViewModel>();

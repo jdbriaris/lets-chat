@@ -3,6 +3,8 @@ using lets_chat.ViewModels;
 using NSubstitute;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace lets_chat_tests.ViewModelTests
 {
@@ -22,11 +24,17 @@ namespace lets_chat_tests.ViewModelTests
         [Test]
         public void ReceiveMessageViewModel_OnMessageServiceRaisesReceivedMessage_SetsMessageToReceivedMessage()
         {
-            const string ExpectedMsg = "Test Message";
+            const string MessageOne = "Message One";
+            const string MessageTwo = "Message Two";
+            var expectedMessages = new List<string>
+            {
+                MessageOne, MessageTwo
+            };
 
-            _messageService.MessageReceived += Raise.Event<EventHandler<string>>(this, ExpectedMsg);
+            _messageService.MessageReceived += Raise.Event<EventHandler<string>>(this, MessageOne);
+            _messageService.MessageReceived += Raise.Event<EventHandler<string>>(this, MessageTwo);
 
-            Assert.That(_viewModel.Message, Is.EqualTo(ExpectedMsg));
+            CollectionAssert.AreEqual(_viewModel.Messages, expectedMessages);
         }
     }
 }

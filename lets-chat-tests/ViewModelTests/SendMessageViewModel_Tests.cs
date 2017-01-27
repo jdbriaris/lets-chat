@@ -19,6 +19,19 @@ namespace lets_chat_tests
         }
 
         [Test]
+        public void SendMessageViewModel_OnConstruction_DisablesSendMessage()
+        {
+            Assert.That(_viewModel.IsSendMessageEnabled, Is.False);
+        }
+
+        [Test]
+        public void SendMessageViewModel_MessageServiceRaisesUserRegistered_EnablessSendMessage()
+        {
+            _messageService.UserRegistered += Raise.Event();
+            Assert.That(_viewModel.IsSendMessageEnabled, Is.True);
+        }
+
+        [Test]
         public void SendMessageViewModel_OnSendMessageCommand_CallsSendMessageOnMessageService()
         {
             const string ExpectedMsg = "Test";
