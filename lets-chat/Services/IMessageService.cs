@@ -6,10 +6,10 @@ namespace lets_chat
     public interface IMessageService
     {
         void Initialize();
-        void Stop();
+        Task Stop();
         void SendMessage(string msg);
         void RegisterUser(string user);
-        void UnregisterUser();
+        Task UnregisterUser();
         event EventHandler<string> MessageReceived;
         event EventHandler UserRegistered;
         event EventHandler UserUnregistered;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.ServiceBus.Messaging;
+using System;
 using System.Threading.Tasks;
 
 namespace lets_chat.Services
@@ -9,11 +10,15 @@ namespace lets_chat.Services
         Task<TopicDescription> CreateTopicAsync(TopicDescription description);
         Task DeleteSubscriptionAsync(string topicPath, string name);
         Task DeleteTopicAsync(string path);
-        TopicClient CreateTopicClient(string path);
-        SubscriptionClient CreateSubscriptionClient(string topicPath, string name);
+        void CreateTopicClient(string path);
+        void CreateSubscriptionClient(string topicPath, string name);
         Task<bool> TopicExistsAsync(string path);
         Task<bool> SubscriptionExistsAsync(string topicPath, string name);
-        TopicDescription GetTopic(string topicPath);
+        Task SendMessageAsync(BrokeredMessage msg);
+        Task CloseTopicClientAsync();
+        Task CloseSubscriptionClientAsync();
+        event EventHandler<BrokeredMessage> MessageReceived;
+        int GetNumberOfActiveSubscriptions(string topicPath);
     }
 
 

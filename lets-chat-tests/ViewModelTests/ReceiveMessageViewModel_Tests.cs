@@ -1,10 +1,10 @@
-﻿using lets_chat;
+﻿using GalaSoft.MvvmLight.Threading;
+using lets_chat;
 using lets_chat.ViewModels;
 using NSubstitute;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace lets_chat_tests.ViewModelTests
 {
@@ -13,6 +13,12 @@ namespace lets_chat_tests.ViewModelTests
     {
         private IMessageService _messageService;
         private IReceiveMessageViewModel _viewModel;
+
+        [OneTimeSetUp]
+        public void FixtureInit()
+        {
+            DispatcherHelper.Initialize();
+        }
 
         [SetUp]
         public void TestInit()

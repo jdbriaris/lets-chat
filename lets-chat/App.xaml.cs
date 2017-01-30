@@ -1,4 +1,5 @@
-﻿using Microsoft.Practices.Unity;
+﻿using GalaSoft.MvvmLight.Threading;
+using Microsoft.Practices.Unity;
 using System.Windows;
 
 namespace lets_chat
@@ -13,6 +14,8 @@ namespace lets_chat
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            DispatcherHelper.Initialize();
+
             _container = new UnityContainer();
             Bootstrapper.RegisterTypes(_container);
 

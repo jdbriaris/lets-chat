@@ -9,6 +9,9 @@ namespace lets_chat.Services
     {
         private NamespaceManager _manager;
         private MessagingFactory _factory;
+        private TopicClient _topicClient;
+        private SubscriptionClient _subscriptionClient;
+        public event EventHandler<BrokeredMessage> MessageReceived;
 
         public ServiceBusShim(NamespaceManager manager, MessagingFactory factory)
         {
@@ -21,9 +24,13 @@ namespace lets_chat.Services
             return _manager.CreateSubscriptionAsync(description);
         }
 
-        public SubscriptionClient CreateSubscriptionClient(string topicPath, string name)
+        public void CreateSubscriptionClient(string topicPath, string name)
         {
-            return _factory.CreateSubscriptionClient(topicPath, name);
+            _subscriptionClient = _factory.CreateSubscriptionClient(topicPath, name);
+            _subscriptionClient.OnMessage((msg) =>
+            {
+                MessageReceived?.Invoke(this, msg);
+            });
         }
 
         public Task<TopicDescription> CreateTopicAsync(TopicDescription description)
@@ -31,14 +38,15 @@ namespace lets_chat.Services
             return _manager.CreateTopicAsync(description);
         }
 
-        public TopicClient CreateTopicClient(string path)
+        public void CreateTopicClient(string path)
         {
-            return _factory.CreateTopicClient(path);
+            _topicClient = _factory.CreateTopicClient(path);
         }
 
         public Task DeleteSubscriptionAsync(string topicPath, string name)
         {
-            return _manager.DeleteSubscriptionAsync(topicPath, name);
+            return _subscriptionClient != null 
+                ? _manager.DeleteSubscriptionAsync(topicPath, name) : Task.CompletedTask;
         }
 
         public Task DeleteTopicAsync(string path)
@@ -56,9 +64,26 @@ namespace lets_chat.Services
             return _manager.SubscriptionExistsAsync(topicPath, name);
         }
 
-        public TopicDescription GetTopic(string topicPath)
+        public Task SendMessageAsync(BrokeredMessage msg)
         {
-            return _manager.GetTopic(topicPath);
+            return _topicClient.SendAsync(msg);
+        }
+
+        public Task CloseTopicClientAsync()
+        {
+            return _topicClient.CloseAsync();
+        }
+
+        public Task CloseSubscriptionClientAsync()
+        {
+            return _subscriptionClient != null ?
+                _subscriptionClient.CloseAsync() : Task.CompletedTask;           
+        }
+
+        public int GetNumberOfActiveSubscriptions(string topicPath)
+        {
+            var description = _manager.GetTopic(topicPath);
+            return description.SubscriptionCount;
         }
     }
 }

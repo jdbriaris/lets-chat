@@ -3,7 +3,9 @@ using lets_chat.Services;
 using Microsoft.ServiceBus.Messaging;
 using NSubstitute;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace lets_chat_tests.ServicesTests
 {
@@ -102,6 +104,84 @@ namespace lets_chat_tests.ServicesTests
             Assert.IsTrue(isFired);
         }
 
-        //TODO need more tests for TopicClient and SubscriptionClient logic. Need to put these in shim somehow.
+        [Test]
+        public void MessageService_RegisterUser_CallsCreateSubscriptionClientOnShim()
+        {
+            _messageService.RegisterUser("Gary");
+
+            _serviceBusShim.Received(1).CreateSubscriptionClient(Topic, Arg.Any<string>());
+        }
+
+        [Test]
+        public void MessageService_ShimRaisesMessageReceived_RaisesMessageReceived()
+        {
+            var expectedMsg = "This is a test message";
+            var brokeredMsg = new BrokeredMessage(expectedMsg);
+            var receivedMsg = "";
+            var isFired = false;
+            _messageService.MessageReceived += (sender, args) =>  {
+                isFired = true;
+                receivedMsg = args;
+            };
+            _messageService.RegisterUser("Barry");
+
+            _serviceBusShim.MessageReceived += Raise.Event<EventHandler<BrokeredMessage>>(this, brokeredMsg);            
+
+            Assert.That(isFired, Is.True);
+            Assert.That(receivedMsg, Is.EqualTo(expectedMsg));
+        }
+
+        [Test]
+        public async Task MessageService_UnregisterUser_CallsCloseSubscriptionClientAsyncOnShim()
+        {
+            await _messageService.UnregisterUser();
+
+            await _serviceBusShim.Received(1).CloseSubscriptionClientAsync();
+        }
+
+        [Test]
+        public async Task MessageService_UnregisterUser_CallsDeleteSubscriptionClientAsyncOnShim()
+        {
+            await _messageService.UnregisterUser();
+
+            await _serviceBusShim.Received(1).DeleteSubscriptionAsync(Topic, Arg.Any<string>());
+        }
+
+        [Test]
+        public async Task MessageService_UnregisterUser_RaisesUserUnregistered()
+        {
+            var isFired = false;
+            _messageService.UserUnregistered += (sender, args) => { isFired = true; };
+
+            await _messageService.UnregisterUser();
+
+            Assert.That(isFired, Is.True);
+        }
+
+        [Test]
+        public async Task MessageService_StopWithExistingSubscriptions_DoesNotCallCloseTopicClientAsyncOnShim()
+        {
+            _serviceBusShim.GetNumberOfActiveSubscriptions(Topic).Returns(1);
+
+            await _messageService.Stop();
+
+            await _serviceBusShim.Received(1).CloseTopicClientAsync();
+            await _serviceBusShim.DidNotReceive().DeleteTopicAsync(Topic);
+        }
+
+        [Test]
+        public async Task MessageService_StopWithNoSubscriptions_CallsCloseTopicClientAsyncOnShim()
+        {
+            _serviceBusShim.GetNumberOfActiveSubscriptions(Topic).Returns(0);
+
+            await _messageService.Stop();
+
+            Received.InOrder(() =>
+            {
+                _serviceBusShim.Received(1).CloseTopicClientAsync();
+                _serviceBusShim.Received(1).DeleteTopicAsync(Topic);
+            });
+        }
+
     }
 }
